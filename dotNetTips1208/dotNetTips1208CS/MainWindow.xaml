@@ -1,0 +1,54 @@
+﻿<Window x:Class="dotNetTips1208CS.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:dotNetTips1208CS"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="350" Width="525">
+  <Window.Resources>
+    <local:SampleDataList x:Key="SampleDataList"/>
+  </Window.Resources>
+  <Grid DataContext="{StaticResource SampleDataList}">
+    <Grid.RowDefinitions>
+      <RowDefinition />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+    <ListView x:Name="ListView1" ItemsSource="{Binding List}">
+      <ListView.ItemContainerStyle>
+        <Style TargetType="ListViewItem">
+          <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+          <!-- WPFではトリガーでも可能 -->
+          <!--<Style.Triggers>
+            <Trigger Property="IsKeyboardFocusWithin" Value="true">
+              <Setter Property="IsSelected" Value="true" />
+            </Trigger>
+          </Style.Triggers>-->
+        </Style>
+      </ListView.ItemContainerStyle>
+      <ListView.ItemTemplate>
+        <DataTemplate>
+          <Grid Background="LightPink" Margin="5,2">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="40" />
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="60" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="{Binding Id, Mode=OneTime}"
+                       HorizontalAlignment="Right" Margin="0,0,5,0" />
+            <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}"
+                     GotFocus="Control_GotFocus"
+                     Grid.Column="1" />
+            <Button GotFocus="Control_GotFocus"
+                    Grid.Column="2" Content="Select" />
+          </Grid>
+        </DataTemplate>
+      </ListView.ItemTemplate>
+    </ListView>
+    <StackPanel Grid.Row="1">
+      <TextBlock>選択された項目のId = <Run Text="{Binding SelectedItem.Id, ElementName=ListView1, Mode=OneWay}" /></TextBlock>
+      <TextBlock>選択された項目のTitle = <Run Text="{Binding SelectedItem.Title, ElementName=ListView1}" /></TextBlock>
+      <TextBlock>フォーカスを受け取ったコントロールの位置 = <Run x:Name="Run1"/></TextBlock>
+    </StackPanel>
+  </Grid>
+</Window>

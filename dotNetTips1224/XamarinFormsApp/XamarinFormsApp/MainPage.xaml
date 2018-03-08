@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:XamarinFormsApp"
+             x:Class="XamarinFormsApp.MainPage">
+
+  <Grid Padding="0" ColumnSpacing="0" RowSpacing="0">
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition />
+      <ColumnDefinition Width="Auto"/>
+    </Grid.ColumnDefinitions>
+
+    <Image x:Name="Image1" BackgroundColor="Gray" />
+
+    <StackLayout Grid.Column="1" Orientation="Vertical" WidthRequest="120" Padding="0" Spacing="0">
+      <Button Clicked="Button_Click" Margin="0,10,0,0" HeightRequest="30" FontSize="12" Text="Open Image File" />
+      <Label Margin="5,10,0,0">BarcodeFormat</Label>
+      <Grid BackgroundColor="Azure" Padding="5">
+        <Label x:Name="BarcodeFormatText" LineBreakMode="CharacterWrap" />
+      </Grid>
+      <Label Margin="5,10,0,0">Text</Label>
+      <Grid BackgroundColor="Azure" Padding="5">
+        <Label x:Name="TextText" LineBreakMode="CharacterWrap" />
+      </Grid>
+    </StackLayout>
+    
+  </Grid>
+</ContentPage>

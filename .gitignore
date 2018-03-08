@@ -1,9 +1,11 @@
 ﻿################################################################################
 # この .gitignore ファイルは Microsoft(R) Visual Studio によって自動的に作成されました。
 ################################################################################
-
-/dotNetTips1208/.vs/dotNetTips1208/v15
-/dotNetTips1208/dotNetTips1208CS/bin/Debug
-/dotNetTips1208/dotNetTips1208CS/obj/Debug
-/dotNetTips1208/dotNetTips1208VB/bin/Debug
-/dotNetTips1208/dotNetTips1208VB/obj/Debug
+.vs/
+bin/
+obj/
+packages/
+*.zip
+*.pfx
+*.bak
+*.user

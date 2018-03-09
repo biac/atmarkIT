@@ -27,6 +27,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SamplePicture", "SamplePict
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dotNetStandard", "dotNetStandard", "{3F3B2693-850C-4058-B21E-1214696EB391}"
+	ProjectSection(SolutionItems) = preProject
+		dotNetStandard\README.md = dotNetStandard\README.md
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StdLib", "dotNetStandard\StdLib\StdLib.csproj", "{2B91B8E0-8B18-4543-9000-CD3B4150D583}"
 EndProject

@@ -1,19 +1,29 @@
-﻿using Microsoft.Win32;
+﻿/*
+This software includes the work that is distributed in the Apache License 2.0 
+
+ZXing.Net
+Copyright © 2012-2017 Michael Jahn https://github.com/micjahn/ZXing.Net
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+
+using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.IO;
 using System.Windows.Threading;
 
 namespace WpfAppCS
@@ -23,46 +33,50 @@ namespace WpfAppCS
   /// </summary>
   public partial class MainWindow : Window
   {
-
-    // WPFではZXing.Presentation名前空間のBarcodeReaderを使う
-    private ZXing.Presentation.BarcodeReader _reader
-      = new ZXing.Presentation.BarcodeReader() { AutoRotate=true,};
-
     public MainWindow()
     {
       InitializeComponent();
 
       ClearResult();
-      this.Image1.SizeChanged += (s, e) => AdjustOverlay();
+      this.SizeChanged += (s, e) => AdjustOverlay();
     }
 
-    private void Button_Click(object sender, RoutedEventArgs e)
+    private async void Button_Click(object sender, RoutedEventArgs e)
     {
       var dialog = new OpenFileDialog();
       dialog.Title = "バーコードの写った画像ファイルを開く";
       dialog.Filter = "画像ファイル(*.png;*.jpg;*.jpeg;*.gif;*.bmp)|*.png;*.jpg;*.jpeg;*.gif;*.bmp";
-      if (dialog.ShowDialog() == true)
-      {
-        ClearResult();
-        DoEvents();
+      if (dialog.ShowDialog() != true)
+        return;
 
-        // 選択された画像ファイルを表示
-        var source = new BitmapImage(new Uri(dialog.FileName));
-        this.Image1.Source = source;
+      ClearResult();
+      DoEvents();
 
-        // バーコード読み取り
-        // WPFではBitmapImageかBitmapSourceを渡す
-        ZXing.Result result = _reader.Decode(Image1.Source as BitmapSource);
-        // ☟別スレッドでやるなら、作成済みのBitmapImageインスタンスは渡せない
-        //ZXing.Result result 
-        //  = await Task.Run(()=> _reader.Decode(new BitmapImage(new Uri(dialog.FileName))));
-        if (result != null)
-          ShowResult(result);
-      }
+      // 選択された画像ファイルを表示
+      var source = new BitmapImage(new Uri(dialog.FileName));
+      this.Image1.Source = source;
+
+      // バーコード読み取り
+      // WPFではZXing.Presentation名前空間のBarcodeReaderを使う
+      ZXing.Presentation.BarcodeReader reader
+        = new ZXing.Presentation.BarcodeReader()
+              {
+                AutoRotate = true,
+                Options = { TryHarder = true },
+              };
+
+      // WPFではBitmapImageかBitmapSourceを渡す
+      //ZXing.Result result = reader.Decode(Image1.Source as BitmapImage);
+      // ☟別スレッドでやるなら、作成済みのBitmapImageインスタンスは渡せない
+      ZXing.Result result
+        = await Task.Run(() => reader.Decode(new BitmapImage(new Uri(dialog.FileName))));
+      if (result != null)
+        ShowResult(result);
     }
 
     private void ClearResult()
     {
+      this.Image1.Source = null;
       this.BarcodeFormatText.Text = "(N/A)";
       this.TextText.Text = "(N/A)";
       this.OverlayCanvas.Visibility = Visibility.Collapsed;
@@ -97,7 +111,7 @@ namespace WpfAppCS
           break;
       }
       BitmapSource bs = this.Image1.Source as BitmapSource;
-      this.Polygon1.RenderTransform = new RotateTransform( orientation,bs.PixelWidth/2.0, bs.PixelHeight/2.0);
+      this.Polygon1.RenderTransform = new RotateTransform(orientation, bs.PixelWidth / 2.0, bs.PixelHeight / 2.0);
 
       this.OverlayCanvas.Visibility = Visibility.Visible;
       AdjustOverlay();
@@ -111,7 +125,7 @@ namespace WpfAppCS
 
       if (this.Image1.Source is BitmapSource bs)
       {
-        Point imagePosition 
+        Point imagePosition
           = this.Image1.TransformToAncestor(this.ImageGrid)
                        .Transform(new Point(0, 0));
         this.OverlayCanvas.Margin
@@ -121,37 +135,6 @@ namespace WpfAppCS
         this.OverlayCanvas.RenderTransform = new ScaleTransform(scale, scale);
       }
     }
-
-
-
-
-    //private byte[] BitmapSourceToArray(BitmapSource bitmapSource)
-    //{
-    //  // Stride = (width) x (bytes per pixel)
-    //  int stride = (int)bitmapSource.PixelWidth * (bitmapSource.Format.BitsPerPixel+7) / 8;
-    //  byte[] pixels = new byte[(int)bitmapSource.PixelHeight * stride];
-
-    //  bitmapSource.CopyPixels(pixels, stride, 0);
-
-    //  return pixels;
-    //}
-
-
-    //private Bitmap BitmapImage2Bitmap(BitmapImage bitmapImage)
-    //{
-    //  // BitmapImage bitmapImage = new BitmapImage(new Uri("../Images/test.png", UriKind.Relative));
-
-    //  using (MemoryStream outStream = new MemoryStream())
-    //  {
-    //    BitmapEncoder enc = new BmpBitmapEncoder();
-    //    enc.Frames.Add(BitmapFrame.Create(bitmapImage));
-    //    enc.Save(outStream);
-    //    Bitmap bitmap = new Bitmap(outStream);
-
-    //    return new Bitmap(bitmap);
-    //  }
-    //}
-
 
     private void DoEvents()
     {

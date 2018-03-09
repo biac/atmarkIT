@@ -22,12 +22,6 @@ This software includes the work that is distributed in the MIT License
 SkiaSharp
 Copyright © 2016-2018 Xamarin Inc. https://github.com/mono/SkiaSharp
 
-FilePicker Plugin for Xamarin and Windows
-Copyright ©2016-2018 Gerald Versluis, rafaelrmou
-https://github.com/jfversluis/FilePicker-Plugin-for-Xamarin-and-Windows
-Copyright ©2016 Rafael Moura
-https://github.com/Studyxnet/FilePicker-Plugin-for-Xamarin-and-Windows/
-
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -35,70 +29,66 @@ https://opensource.org/licenses/mit-license.php
 */
 
 
-using Plugin.FilePicker;
 using SkiaSharp;
 using System;
-using System.IO;
 using System.Threading.Tasks;
-using Xamarin.Forms;
 using ZXing; // BarcodeReaderExtensionsの拡張メソッドを利用
 
-namespace XamarinFormsApp
+// これは .NET Standard 1.3 規格の PCL です。
+// ビルド出力の NuGet パッケージを、使いたい側のプロジェクトにインストールします。
+// ※プロジェクトの参照にこのプロジェクトを直接追加したときは、このプロジェクトが依存している ZXing.NET 等のパッケージを手動で追加します
+
+// 利用可能なプラットフォーム:
+// .NET Framework 4.6
+// .NET Core 1.0
+// UWP 10.0.12040
+// Xamarin.Android 7.0
+// Xamarin.iOS 10.0
+
+// このようにしておけば、利用する側のプロジェクトでは…
+// ・NuGet パッケージを 1 つだけ入れる
+// ・画像は、とにかくバイト配列にして渡せばいい
+// …と単純化されるので、便利かもしれません。
+// (ただし、プラットフォームによっては無駄な処理が増えるし、バイナリのサイズも大きくなる)
+
+namespace StdLib
 {
-  public partial class MainPage : ContentPage
+  public class ZXingResultSummary
   {
-    public MainPage()
+    public string Text { get; }
+    public string Format { get; }
+
+    private ZXingResultSummary()
     {
-      InitializeComponent();
+      // avoid instance
     }
-
-    private async void Button_Click(object sender, EventArgs e)
+    internal ZXingResultSummary(ZXing.Result result)
     {
-      var file = await CrossFilePicker.Current.PickFile();
-      if (file == null)
-        return;
+      Text = result.Text;
+      Format = result.BarcodeFormat.ToString();
+    }
+  }
 
-      ClearResult();
+  public class ZXingBarcodeReader
+  {
+    public static async Task<ZXingResultSummary> DecodeAsync(byte[] imageFileData)
+    {
+      if (imageFileData == null || imageFileData.Length == 0)
+        return null;
 
-      // 選択された画像ファイルを表示
-      byte[] fileData = file.DataArray;
-      this.Image1.Source
-        = ImageSource.FromStream(() => new MemoryStream(fileData, 0, fileData.Length));
+      using (SKBitmap bitmap = SKBitmap.Decode(imageFileData))
+      {
+        if (bitmap == null)
+          throw new NotSupportedException("Unsupported image format by SkiaSharp");
 
-      // バーコード読み取り
-      // Xamarin.Formsでは色々な方法が考えられるが、ここではSkiaSharpを使う
-      using (SKBitmap bitmap = SKBitmap.Decode(fileData))
-      { 
-        ZXing.BarcodeReader reader = new BarcodeReader()
+        var reader = new ZXing.BarcodeReader()
         {
           AutoRotate = true,
           Options = { TryHarder = true },
         };
-        //ZXing.Result result = reader.Decode(bitmap);
-        // ☟別スレッドでやるときも、UIスレッドで作成したSKBitmapインスタンスを渡してよい
-        ZXing.Result result = await Task.Run(() => reader.Decode(bitmap));
-
-        // 注意：☝このDecodeメソッドは拡張メソッドとして実装されている
-        // https://github.com/micjahn/ZXing.Net/blob/master/Source/Bindings/ZXing.SkiaSharp/BarcodeReader.Extensions.cs
-        // ので、using ZXing; が必須。
-
-        if (result != null)
-          ShowResult(result);
+        var result = await Task.Run(() => reader.Decode(bitmap));
+        return (result != null) ? new ZXingResultSummary(result) : null;
       }
     }
-
-    private void ClearResult()
-    {
-      this.Image1.Source = null;
-      this.BarcodeFormatText.Text = "(N/A)";
-      this.TextText.Text = "(N/A)";
-    }
-
-    private void ShowResult(ZXing.Result result)
-    {
-      this.BarcodeFormatText.Text = result.BarcodeFormat.ToString();
-      this.TextText.Text = result.Text;
-    }
-
   }
 }

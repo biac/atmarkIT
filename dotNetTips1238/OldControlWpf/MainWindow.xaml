@@ -1,0 +1,33 @@
+﻿<Window x:Class="OldControlWpf.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:OldControlWpf"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <WebBrowser Name="WebView1" Grid.Row="1" Source="http://bluewatersoft.jp/"
+                Navigating="WebView1_Navigating" Navigated="WebView1_Navigated"/>
+
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+      <TextBlock VerticalAlignment="Center" Margin="10,0,5,0">URL</TextBlock>
+      <TextBox x:Name="UrlTextBox" Grid.Column="1" HorizontalAlignment="Stretch"/>
+      <Button Click="Button_Click" Grid.Column="2" Padding="10,0">GO</Button>
+    </Grid>
+
+    <TextBox x:Name="MessageTextBox" Grid.Row="2" IsReadOnly="True" Height="50"
+             VerticalScrollBarVisibility="Auto" />
+  </Grid>
+</Window>
